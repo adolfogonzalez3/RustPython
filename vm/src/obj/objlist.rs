@@ -417,6 +417,14 @@ impl PyListRef {
         self
     }
 
+    fn sizeof(self, _vm: &VirtualMachine) -> PyResult<usize> {
+        let length = self.elements.borrow().len();
+        let size = mem::size_of::<PyListRef>();
+        let size = size + mem::size_of::<Vec<PyObjectRef>>();
+        let size = size + mem::size_of::<PyObjectRef>() * length;
+        Ok(size)
+    }
+
     fn count(self, needle: PyObjectRef, vm: &VirtualMachine) -> PyResult<usize> {
         let mut count: usize = 0;
         for element in self.elements.borrow().iter() {
@@ -883,6 +891,7 @@ pub fn init(context: &PyContext) {
         "__mul__" => context.new_rustfunc(PyListRef::mul),
         "__rmul__" => context.new_rustfunc(PyListRef::rmul),
         "__imul__" => context.new_rustfunc(PyListRef::imul),
+        "__sizeof__" => context.new_rustfunc(PyListRef::sizeof),
         "__len__" => context.new_rustfunc(PyListRef::len),
         "__new__" => context.new_rustfunc(list_new),
         "__repr__" => context.new_rustfunc(PyListRef::repr),
